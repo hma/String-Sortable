@@ -1,0 +1,61 @@
+DISCLAIMER
+
+This is the UNSTABLE, possibly untested, DEVELOPER RELEASE of
+String-Sortable to GitHub.
+
+This module has not yet been released to CPAN.
+
+END OF DISCLAIMER
+
+-8<-
+
+
+String::Sortable
+================
+
+SYNOPSIS
+
+    use String::Sortable;
+
+    my $sortable = String::Sortable->new( 'The @Title' );
+
+    printf "Display: %s\n", $sortable->display;  # The Title
+    printf "Sortify: %s\n", $sortable->sortify;  # Title
+
+    $sortable = String::Sortable->new( '¬The Title of ¬the Thing' );
+
+    printf "Display: %s\n", $sortable->display;  # The Title of the Thing
+    printf "Sortify: %s\n", $sortable->sortify;  # Title of Thing
+
+
+INSTALLATION
+
+To install this module, run the following commands:
+
+    perl Makefile.PL
+    make
+    make test
+    make install
+
+
+DOCUMENTATION
+
+After installing, you can find documentation for this module with
+the perldoc command:
+
+    perldoc String::Sortable
+
+
+COPYRIGHT AND LICENCE
+
+Copyright (c) 2010 Henning Manske. All rights reserved.
+
+This module is free software. You can redistribute it and/or modify it
+under the terms of either: the GNU General Public License as published
+by the Free Software Foundation; or the Artistic License.
+
+See http://dev.perl.org/licenses/
+
+This module is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
