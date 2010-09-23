@@ -1,6 +1,6 @@
 #!perl
 #
-#  xt/author/spelling.t 0.01 hma Sep 16, 2010
+#  xt/author/spelling.t 0.02 hma Sep 23, 2010
 #  String-Sortable customized stopwords 0.01 hma Sep 22, 2010
 #
 #  Check for spelling errors in POD files
@@ -37,7 +37,21 @@ while (my ($module, $version) = each %MODULES) {
 add_stopwords( map { split /\s+/ } grep { chomp; s/#.*//; /\S/ } <DATA> );
 
 set_spell_cmd('aspell list -l en');
-all_pod_files_spelling_ok();
+
+my $renamed;
+unless ( $ENV{PERL5LIB} && $ENV{PERL5LIB} =~ / \b blib \b lib \b/x ) {
+  # we are presumably not called by the building toolchain
+  # so make sure we test the contents of 'lib', not 'blib'
+
+  # rename 'blib' if exists
+  # because Test::Spelling will look for it
+  $renamed = -d 'blib' && ! -e 'blib.old' && rename 'blib', 'blib.old';
+}
+eval { all_pod_files_spelling_ok() };
+
+rename 'blib.old', 'blib' if $renamed;
+
+die $@ if $@;
 
 __DATA__
 

@@ -1,6 +1,6 @@
 #!perl -T
 #
-#  xt/pod.t 0.01 hma Sep 16, 2010
+#  xt/pod.t 0.02 hma Sep 23, 2010
 #
 #  Check for POD errors in files
 #
@@ -37,4 +37,17 @@ while (my ($module, $version) = each %MODULES) {
 
 if (0) { require Test::Pod; }
 
-all_pod_files_ok();
+my $renamed;
+unless ( $ENV{PERL5LIB} && $ENV{PERL5LIB} =~ / \b blib \b lib \b/x ) {
+  # we are presumably not called by the building toolchain
+  # so make sure we test the contents of 'lib', not 'blib'
+
+  # rename 'blib' if exists
+  # because Test::Pod will look for it
+  $renamed = -d 'blib' && ! -e 'blib.old' && rename 'blib', 'blib.old';
+}
+eval { all_pod_files_ok() };
+
+rename 'blib.old', 'blib' if $renamed;
+
+die $@ if $@;

@@ -1,6 +1,6 @@
 #!perl -T
 #
-#  xt/author/pod-no404s.t 0.01 hma Sep 16, 2010
+#  xt/author/pod-no404s.t 0.02 hma Sep 23, 2010
 #
 #  Checks POD for http 404 links
 #  RELEASE_TESTING only
@@ -34,4 +34,17 @@ while (my ($module, $version) = each %MODULES) {
   die "Could not load required release testing module $module:\n$@" if $@;
 }
 
-all_pod_files_ok();
+my $renamed;
+unless ( $ENV{PERL5LIB} && $ENV{PERL5LIB} =~ / \b blib \b lib \b/x ) {
+  # we are presumably not called by the building toolchain
+  # so make sure we test the contents of 'lib', not 'blib'
+
+  # rename 'blib' if exists
+  # because Test::Pod::No404s will look for it
+  $renamed = -d 'blib' && ! -e 'blib.old' && rename 'blib', 'blib.old';
+}
+eval { all_pod_files_ok() };
+
+rename 'blib.old', 'blib' if $renamed;
+
+die $@ if $@;
