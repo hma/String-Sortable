@@ -13,6 +13,9 @@ my $NAME = 'String::Sortable';
 (my $path = $NAME) =~ s|::|/|g;
 
 my $META = {
+  no_index => {
+    directory  => 'xt',
+  },
   resources => {
    #homepage   => "http://search.cpan.org/dist/$dist/",
     bugtracker => "http://github.com/hma/$dist/issues",
