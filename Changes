@@ -1,5 +1,9 @@
 Revision history for Perl extension String-Sortable
 
+0.00_02 Nov 29, 2010
+
+        - Feature: user-defined control characters
+
 0.00_01 Sep 22, 2010
 
         - Initial commit and release to GitHub

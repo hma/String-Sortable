@@ -5,7 +5,7 @@ use 5.006;
 use strict;
 use warnings FATAL => 'all';
 
-our $VERSION = '0.00_01';
+our $VERSION = '0.00_02';
 
 $VERSION = eval $VERSION;
 
@@ -40,15 +40,15 @@ sub new {
 
 sub display {
   my $self = shift;
-  return $self->_parse->{plain} ? $self->{raw} : $self->{display};
+  return exists $self->_parse->{display} ? $self->{display} : $self->{raw};
 }
 
 
 
 sub sortify {
   my $self = shift;
-  return $self->_parse->{plain} ? lc $self->{raw}
-    : exists $self->{sort} ? $self->{sort} : lc $self->{display};
+  return exists $self->_parse->{sortified} ? $self->{sortified} :
+    exists $self->{display} ? lc $self->{display} : lc $self->{raw};
 }
 
 
@@ -74,47 +74,68 @@ sub equals {
 #  private methods
 #
 
-sub _parse {
-  my $self = shift;
-  return $self if $self->{plain} || exists $self->{display};
+{
+  my %_cache;
 
-  if (! defined(my $raw = $self->{raw}) ) {
-    $self->{display} = EMPTY_STRING;
-  }
-  elsif (index($raw, my $cc = NONSORT_CC) > -1) {
-    my $display = my $sort = EMPTY_STRING;
-    while (
-      $raw =~ s{
-        $cc
-        ( [[:alnum:]]*    # any alphanumerical character
-          [ .]?           # optional space or full stop
-          (?:'(?=$cc))?   # optional apostrophe, if followed by the control character
-        )
-        (?: (?<=')$cc )?  # control character, if preceeded by apostrophe
-        ( [^$cc]* )       # anything except the control character
-      }{}xo
-    ) {
-      $display .= $1 . $2;
-      $sort .= $2;
-    }
-    $self->{display} = $display;
-    $self->{sort}    = lc $sort;
-  }
-  elsif ((my $index = index $raw, SORT_CC) > -1) {
-    if ($index == 0) {
-      $self->{display} = substr $raw, 1;
+  sub _parse {
+    my $self = shift;
+    return $self if $self->{_parsed}++;
+
+    if (! defined(my $raw = $self->{raw}) ) {
+      $self->{display} = EMPTY_STRING;
     }
     else {
-      $self->{display} = substr($raw, 0, $index++) . substr $raw, $index;
-      $self->{sort}    = lc substr $raw, $index;
+      my $nonsort_cc = $self->{nonsort} unless defined(my $sort_cc = $self->{sort});
+
+      unless (defined $sort_cc) {
+        my $cc = defined $nonsort_cc ? $nonsort_cc : NONSORT_CC;
+
+        if (index($raw, $cc) > -1) {
+          my $pattern = $_cache{$cc} ||= do {
+            $cc = quotemeta $cc;
+            qr{
+              $cc
+              ( [[:alnum:]]*    # any alphanumerical character
+                [ .]?           # optional space or full stop
+                (?:'(?=$cc))?   # optional apostrophe, if followed by the control character
+              )
+              (?: (?<=')$cc )?  # control character, if preceeded by apostrophe
+              ( [^$cc]* )       # anything except the control character
+            }x
+          };
+
+          my $display = my $sortified = EMPTY_STRING;
+          while ($raw =~ s/$pattern//) {
+            $display .= $1 . $2;
+            $sortified .= $2;
+          }
+          $self->{display} = $display;
+          $self->{sortified} = lc $sortified;
+          return $self;
+        }
+      }
+
+      unless (defined $nonsort_cc) {
+        my $cc = defined $sort_cc ? $sort_cc : SORT_CC;
+
+        if ((my $index = index $raw, $cc) > -1) {
+          if ($index == 0) {
+            $self->{display} = substr $raw, 1;
+          }
+          else {
+            $self->{display} = substr($raw, 0, $index++) . substr $raw, $index;
+            $self->{sortified} = lc substr $raw, $index;
+          }
+        }
+      }
+
+
     }
-  }
-  else {
-    $self->{plain} = 1;
+
+    return $self
   }
 
-  return $self
-}
+} # end of scope of %_cache
 
 
 
