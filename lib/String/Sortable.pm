@@ -21,6 +21,84 @@ use overload fallback => 1,
 
 
 
+{
+  my $defaults = { nonsort => NONSORT_CC, clear => 1 };
+
+  sub setup {
+    my $params;
+    for (@_) {
+      if (ref eq 'HASH') {
+        $defaults = _prepare($_);
+        last;
+      }
+    }
+    return $defaults;
+  }
+}
+
+sub _prepare {
+  my $in = shift;
+  my %out;
+
+  if ($in) {
+    if (ref $in eq 'HASH') {
+      %out = %$in;
+    }
+    elsif ($in eq 'sort') {
+      $out{sort} = SORT_CC;
+    }
+    elsif ($in ne 'nonsort') {
+      die "Unknown param: $in";
+    }
+  }
+
+  my $defaults = setup;
+
+  for (keys %$defaults) {
+    $out{$_} = $defaults->{$_} unless exists $out{$_};
+  }
+
+  if (exists $out{nonsort}) {
+    if (defined $out{sort}) {
+      delete $out{nonsort};
+    }
+    elsif (!defined $out{nonsort}) {
+      delete $out{nonsort};
+      $out{sort} = SORT_CC;
+    }
+  }
+
+  return \%out;
+}
+
+
+
+sub import {
+  my $class = shift;
+  return unless @_;
+
+  while (@_) {
+    my $name   = shift;
+    my $params = shift;
+
+    next unless defined $name;
+
+    if ($name eq '-setup') {
+      $class->setup($params);
+    }
+    else {
+      my $caller = caller;
+      $params = _prepare($params);
+
+      no strict 'refs';
+      *{$caller . '::' . $name} = sub { map { $class->new($_, %$params) } @_ };
+    }
+  }
+
+}
+
+
+
 #
 #  constructor
 #
@@ -85,12 +163,34 @@ sub equals {
       $self->{display} = EMPTY_STRING;
     }
     else {
-      my $nonsort_cc = $self->{nonsort} unless defined(my $sort_cc = $self->{sort});
+      my ($cc, $sort);
 
-      unless (defined $sort_cc) {
-        my $cc = defined $nonsort_cc ? $nonsort_cc : NONSORT_CC;
+      if (defined($cc = $self->{sort})) {
+        $sort = 1;
+      }
+      else {
+        unless (defined($cc = $self->{nonsort})) {
+          my $defaults = $self->setup;
+          if (defined($cc = $defaults->{sort})) {
+            $sort = 1;
+          }
+          else {
+            $cc = $defaults->{nonsort};
+          }
+        }
+      }
 
-        if (index($raw, $cc) > -1) {
+      if ((my $index = index $raw, $cc) > -1) {
+        if ($sort) {
+          if ($index == 0) {
+            $self->{display} = substr $raw, 1;
+          }
+          else {
+            $self->{display} = substr($raw, 0, $index++) . substr $raw, $index;
+            $self->{sortified} = lc substr $raw, $index;
+          }
+        }
+        else {
           my $pattern = $_cache{$cc} ||= do {
             $cc = quotemeta $cc;
             qr{
@@ -103,7 +203,6 @@ sub equals {
               ( [^$cc]* )       # anything except the control character
             }x
           };
-
           my $display = my $sortified = EMPTY_STRING;
           while ($raw =~ s/$pattern//) {
             $display .= $1 . $2;
@@ -111,25 +210,8 @@ sub equals {
           }
           $self->{display} = $display;
           $self->{sortified} = lc $sortified;
-          return $self;
         }
       }
-
-      unless (defined $nonsort_cc) {
-        my $cc = defined $sort_cc ? $sort_cc : SORT_CC;
-
-        if ((my $index = index $raw, $cc) > -1) {
-          if ($index == 0) {
-            $self->{display} = substr $raw, 1;
-          }
-          else {
-            $self->{display} = substr($raw, 0, $index++) . substr $raw, $index;
-            $self->{sortified} = lc substr $raw, $index;
-          }
-        }
-      }
-
-
     }
 
     return $self
@@ -151,12 +233,7 @@ String::Sortable - Perl class for strings containing sorting information
 
   use String::Sortable;
 
-  my $sortable = String::Sortable->new( 'The @Title' );
-
-  printf "Display: %s\n", $sortable->display;  # The Title
-  printf "Sortify: %s\n", $sortable->sortify;  # title
-
-  $sortable = String::Sortable->new( '¬The Title of ¬the Thing' );
+  my $sortable = String::Sortable->new( '¬The Title of ¬the Thing' );
 
   printf "Display: %s\n", $sortable->display;  # The Title of the Thing
   printf "Sortify: %s\n", $sortable->sortify;  # title of thing

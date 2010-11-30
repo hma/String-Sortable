@@ -24,10 +24,10 @@ my @s = (
   [ '¬Nonsort1 ¬Nonsort2 Sort Text' ], 'sort text' , 'Nonsort1 Nonsort2 Sort Text', # 7
 
   # sorting control character
-  [ 'Nonsort @Sort Text'            ], 'sort text' , 'Nonsort Sort Text',           # 8
-  [ '@Sort Text'                    ], 'sort text' , 'Sort Text',                   # 9
-  [ '@@Sort Text'                   ], '@sort text', '@Sort Text',                  # 10
-  [ '@Sort @Text'                   ], 'sort @text', 'Sort @Text',                  # 11
+# [ 'Nonsort @Sort Text'            ], 'sort text' , 'Nonsort Sort Text',           # 8
+# [ '@Sort Text'                    ], 'sort text' , 'Sort Text',                   # 9
+# [ '@@Sort Text'                   ], '@sort text', '@Sort Text',                  # 10
+# [ '@Sort @Text'                   ], 'sort @text', 'Sort @Text',                  # 11
 
   # precedence of control characters
   [ '¬Nonsort @Sort Text'           ], '@sort text', 'Nonsort @Sort Text',          # 12
@@ -36,7 +36,7 @@ my @s = (
   [ undef                           ], EMPTY_STRING, EMPTY_STRING,                  # 13
 
   # strings from SYNOPSIS
-  [ 'The @Title'                    ], 'title'         , 'The Title',               # 14
+# [ 'The @Title'                    ], 'title'         , 'The Title',               # 14
   [ '¬The Title of ¬the Thing'      ], 'title of thing', 'The Title of the Thing',  # 15
 
   [ 'Cyberpl@y', nonsort => '^'     ], 'cyberpl@y'     , 'Cyberpl@y',               # 16

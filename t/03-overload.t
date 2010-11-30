@@ -31,7 +31,7 @@ cmp_ok $integer + 1, '==', 2.23, 'numeric conversion +  (enabled by fallback)';
 #
 
 my $title1 = String::Sortable->new( '¬The Title of ¬the Thing' );
-my $title2 = String::Sortable->new( 'The @Title of the Thing'  );
+my $title2 = String::Sortable->new( 'The @Title of the Thing', sort => '@' );
 
 cmp_ok $title1 cmp 'title of thing', '==', 0  , 'object cmp string compares by sort form';
 cmp_ok $title1, 'eq', 'The Title of the Thing', 'object eq string compares by display form';
@@ -52,7 +52,7 @@ cmp_ok $title1, 'eq', $title2        , 'object eq object compares by display for
 #  author names example (idea for SYNOPSIS)
 #
 
-my @authors = map { String::Sortable->new($_) } (
+my @authors = map { String::Sortable->new($_, sort => '@') } (
  'Larry @Wall',
  'Tom @Christiansen',
  'Jon @Orwant',

@@ -17,12 +17,7 @@ SYNOPSIS
 
     use String::Sortable;
 
-    my $sortable = String::Sortable->new( 'The @Title' );
-
-    printf "Display: %s\n", $sortable->display;  # The Title
-    printf "Sortify: %s\n", $sortable->sortify;  # title
-
-    $sortable = String::Sortable->new( '¬The Title of ¬the Thing' );
+    my $sortable = String::Sortable->new( '¬The Title of ¬the Thing' );
 
     printf "Display: %s\n", $sortable->display;  # The Title of the Thing
     printf "Sortify: %s\n", $sortable->sortify;  # title of thing
