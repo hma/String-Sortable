@@ -1,12 +1,13 @@
 Revision history for Perl extension String-Sortable
 
-0.00_02 Nov 30, 2010
+0.00_02 Dec 11, 2010
 
         - Major refactoring:
             * User-defined control characters
             * Remove auto-detection of markup
             * Setup defaults via import
             * Export pre-configured functions on demand
+        - Switch GitHub URLs to https
 
 0.00_01 Sep 22, 2010
 
