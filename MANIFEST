@@ -6,9 +6,9 @@ META.yml
 README
 t/00-load.t
 t/01-constructor.t
-t/02-methods.t
-t/03-overload.t
-t/04-utf8.t
+t/04-methods.t
+t/05-overload.t
+t/06-utf8.t
 xt/cpan-meta.t
 xt/hasversion.t
 xt/minimumversion.t
