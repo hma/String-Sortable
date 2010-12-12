@@ -5,7 +5,7 @@ use warnings;
 
 use constant EMPTY_STRING => q{};
 
-use Test::More tests => 13;
+use Test::More tests => 12;
 
 use String::Sortable;
 
@@ -13,7 +13,7 @@ use String::Sortable;
 #  overload of '""'
 #
 
-my $title     = String::Sortable->new('The @Title');
+my $title     = String::Sortable->new('¬The Title');
 my $empty     = String::Sortable->new(EMPTY_STRING);
 my $no_string = String::Sortable->new;
 my $integer   = String::Sortable->new('1.23');
@@ -42,26 +42,26 @@ cmp_ok $title2 cmp $title1, '==', -1, 'object 2 cmp object 1';
 
 cmp_ok 'title of thing' cmp $title1, '==', 0  , 'string cmp object (reversed test)';
 
-cmp_ok $title1, 'eq', $title2        , 'object eq object compares by display form';
+cmp_ok $title1, 'eq', $title2       , 'object eq object compares by display form';
 
 
 
-### coverage is 100% here ###
+### no more coverage here ###
 
 #
 #  author names example (idea for SYNOPSIS)
 #
 
-my @authors = map { String::Sortable->new($_, sort => '@') } (
- 'Larry @Wall',
- 'Tom @Christiansen',
- 'Jon @Orwant',
-);
-
-my @author_names_sorted = (
-  'Tom Christiansen',
-  'Jon Orwant',
-  'Larry Wall',
-);
-
-is_deeply [ map { $_->display } sort @authors ], \@author_names_sorted, 'object sort';
+# my @authors = map { String::Sortable->new($_, sort => '@') } (
+#  'Larry @Wall',
+#  'Tom @Christiansen',
+#  'Jon @Orwant',
+# );
+#
+# my @author_names_sorted = (
+#   'Tom Christiansen',
+#   'Jon Orwant',
+#   'Larry Wall',
+# );
+#
+# is_deeply [ map { $_->display } sort @authors ], \@author_names_sorted, 'object sort';
