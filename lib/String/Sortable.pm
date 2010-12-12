@@ -19,22 +19,23 @@ use overload fallback => 1,
   'eq'  => 'equals',
   'ne'  => sub { ! shift->equals(shift) };
 
+use Carp ();
+
 
 
 {
-  my $defaults = { nonsort => NONSORT_CC, clear => 1 };
+  my $_setup = { nonsort => NONSORT_CC };
 
   sub setup {
-    my $params;
-    for (@_) {
-      if (ref eq 'HASH') {
-        $defaults = _prepare($_);
-        last;
-      }
+    my $class = shift;
+    if (@_) {
+      $_setup = _prepare(shift);
     }
-    return $defaults;
+    return $_setup;
   }
 }
+
+
 
 sub _prepare {
   my $in = shift;
@@ -43,19 +44,26 @@ sub _prepare {
   if ($in) {
     if (ref $in eq 'HASH') {
       %out = %$in;
+      if (defined $out{nonsort}) {
+        $out{sort} = undef;
+      }
     }
     elsif ($in eq 'sort') {
       $out{sort} = SORT_CC;
     }
-    elsif ($in ne 'nonsort') {
-      die "Unknown param: $in";
+    elsif ($in eq 'nonsort') {
+      $out{sort} = undef;
+      $out{nonsort} = NONSORT_CC;
+    }
+    else {
+      Carp::croak "Unknown parameter: $in";
     }
   }
 
-  my $defaults = setup;
+  my $setup = setup;
 
-  for (keys %$defaults) {
-    $out{$_} = $defaults->{$_} unless exists $out{$_};
+  for (keys %$setup) {
+    $out{$_} = $setup->{$_} unless exists $out{$_};
   }
 
   if (exists $out{nonsort}) {
@@ -63,9 +71,22 @@ sub _prepare {
       delete $out{nonsort};
     }
     elsif (!defined $out{nonsort}) {
-      delete $out{nonsort};
-      $out{sort} = SORT_CC;
+      if (exists $out{sort}) {
+        delete $out{sort};
+        $out{nonsort} = NONSORT_CC;
+      }
+      else {
+        delete $out{nonsort};
+        $out{sort} = SORT_CC;
+      }
     }
+    elsif (exists $out{sort}) {
+      delete $out{sort};
+    }
+  }
+  elsif (!defined $out{sort}) {
+    delete $out{sort};
+    $out{nonsort} = NONSORT_CC;
   }
 
   return \%out;
@@ -75,7 +96,6 @@ sub _prepare {
 
 sub import {
   my $class = shift;
-  return unless @_;
 
   while (@_) {
     my $name   = shift;
@@ -94,7 +114,6 @@ sub import {
       *{$caller . '::' . $name} = sub { map { $class->new($_, %$params) } @_ };
     }
   }
-
 }
 
 
@@ -106,8 +125,7 @@ sub import {
 sub new {
   my $class = shift;
   unshift @_, 'raw' if @_ % 2;
-  my %param = @_;
-  bless \%param, $class;
+  bless { @_ }, $class;
 }
 
 
@@ -170,12 +188,12 @@ sub equals {
       }
       else {
         unless (defined($cc = $self->{nonsort})) {
-          my $defaults = $self->setup;
-          if (defined($cc = $defaults->{sort})) {
+          my $setup = $self->setup;
+          if (defined($cc = $setup->{sort})) {
             $sort = 1;
           }
           else {
-            $cc = $defaults->{nonsort};
+            $cc = $setup->{nonsort};
           }
         }
       }
@@ -259,6 +277,8 @@ Creates a new C<String::Sortable> object and returns it.
 =head1 METHODS
 
 =over 4
+
+=item $config    = String::Sortable->setup($config);
 
 =item $display   = $sortable->display;
 
