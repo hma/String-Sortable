@@ -1,5 +1,9 @@
 Revision history for Perl extension String-Sortable
 
+0.00_03 May 27, 2011
+
+        - Minor cosmetic changes
+
 0.00_02 Dec 17, 2010
 
         - Major refactoring:

@@ -5,9 +5,9 @@ use 5.006;
 use strict;
 use warnings FATAL => 'all';
 
-our $VERSION = '0.00_02';
+our $VERSION = '0.00_03';
 
-$VERSION = eval $VERSION;
+use Carp ();
 
 use constant NONSORT_CC   => chr(172); # ¬
 use constant SORT_CC      => '@';
@@ -18,8 +18,6 @@ use overload fallback => 1,
   'cmp' => 'compare',
   'eq'  => 'equals',
   'ne'  => sub { ! shift->equals(shift) };
-
-use Carp ();
 
 
 
@@ -239,7 +237,7 @@ sub equals {
 
 
 
-1;
+$VERSION = eval $VERSION;
 
 __END__
 
@@ -306,7 +304,7 @@ Henning Manske <hma@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2010 Henning Manske. All rights reserved.
+Copyright (c) 2010-2011 Henning Manske. All rights reserved.
 
 This module is free software. You can redistribute it and/or modify it
 under the terms of either: the GNU General Public License as published
